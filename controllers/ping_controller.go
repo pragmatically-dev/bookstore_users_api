@@ -1,7 +1,12 @@
 package controllers
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
 
+	"github.com/gin-gonic/gin"
+)
+
+//Ping ping endpoint
 func Ping(ctx *gin.Context) {
-	ctx.String(200, "pong")
+	ctx.String(http.StatusOK, "pong")
 }
