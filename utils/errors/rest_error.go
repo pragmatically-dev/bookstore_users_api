@@ -18,14 +18,3 @@ func (ae *APIErrors) GetErrors() []error {
 
 	return ae.Errors
 }
-
-//UserError implements error interface from builtin
-type UserError struct {
-	Reason string `json:"reason,omitempty"`
-	Msg    string `json:"message,omitempty"`
-	Code   int    `json:"code,omitempty"`
-}
-
-func (u *UserError) Error() string {
-	return u.Msg
-}
