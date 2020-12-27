@@ -20,3 +20,11 @@ func NewBadRequestError(msg, reason string) *UserError {
 		Code:   http.StatusBadRequest,
 	}
 }
+
+func NewNotFoundError(msg, reason string) *UserError {
+	return &UserError{
+		Reason: reason,
+		Msg:    msg,
+		Code:   http.StatusNotFound,
+	}
+}

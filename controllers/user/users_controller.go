@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pragmatically-dev/bookstore_users_api/domain/users"
@@ -10,8 +11,20 @@ import (
 )
 
 func GetUser(ctx *gin.Context) {
-
-	ctx.JSON(http.StatusNotImplemented, "not implemented")
+	var errs errors.APIErrors
+	raw,_ :=ctx.Params.Get("id")
+	UserID,err := strconv.ParseInt(raw,10,64)
+	if err != nil{
+		errs.AddError(errors.NewBadRequestError("Invalid ID","Could not parse ID"))
+		ctx.JSON(http.StatusBadRequest,errs)
+		return
+	}
+	user,errsGetUser:=services.GetUser(UserID)
+	if errsGetUser != nil{
+		ctx.JSON(http.StatusNotFound,errsGetUser)
+		return
+	}
+	ctx.JSON(http.StatusFound,&user)
 }
 
 //CreateUser controller for create an user

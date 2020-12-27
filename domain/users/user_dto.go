@@ -15,6 +15,14 @@ type User struct {
 	CreatedAt string `json:"created_at"`
 }
 
+func (user *User) CopyWith(data *User) {
+	user.ID = data.ID
+	user.FirstName = data.FirstName
+	user.LastName = data.LastName
+	user.Email = data.Email
+	user.CreatedAt = data.CreatedAt
+}
+
 func (user *User) Validate() *errors.APIErrors {
 	var errs errors.APIErrors
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
