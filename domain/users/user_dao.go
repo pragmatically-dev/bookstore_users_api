@@ -1,24 +1,10 @@
 package users
 
 import (
-	"github.com/go-sql-driver/mysql"
 	db "github.com/pragmatically-dev/bookstore_users_api/datasources/mysql/usersdb"
 	"github.com/pragmatically-dev/bookstore_users_api/utils/dateutils"
 	"github.com/pragmatically-dev/bookstore_users_api/utils/errors"
-)
-
-type mysqlErr struct {
-	Number int
-	Msg    string
-}
-
-func (err *mysqlErr) Error() string {
-	return err.Msg
-}
-
-var (
-	//ErrDuplicateEntry .
-	ErrDuplicateEntry = mysqlErr{Number: 1062, Msg: "Error Duplicate Entry"}
+	"github.com/pragmatically-dev/bookstore_users_api/utils/mysqlutils"
 )
 
 var (
@@ -38,13 +24,11 @@ var (
 
 //Get returns an user from dbs
 func (user *User) Get() *errors.APIErrors {
-	var errs errors.APIErrors
+
 	var userFound User
 	getErr := db.Client.Get(&userFound, getUserQuery, user.ID)
 	if getErr != nil {
-
-		errs.AddError(errors.NewNotFoundError("User not found", "Not Found"))
-		return &errs
+		return mysqlutils.ParseError(getErr)
 	}
 	user.CopyWith(&userFound)
 
@@ -63,17 +47,7 @@ func (user *User) Save() *errors.APIErrors {
 	}
 	res, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.CreatedAt)
 	if saveErr != nil {
-		sqlErr, ok := saveErr.(*mysql.MySQLError)
-		if !ok {
-			errs.AddError(errors.NewInternalServerError(err.Error(), "Internal Server Error: Error when trying to save user"))
-			return &errs
-		}
-		switch sqlErr.Number {
-		case uint16(ErrDuplicateEntry.Number):
-			errs.AddError(errors.NewBadRequestError("The email is already registred", ErrDuplicateEntry.Error()))
-			return &errs
-
-		}
+		return mysqlutils.ParseError(saveErr)
 	}
 
 	userID, err := res.LastInsertId()
