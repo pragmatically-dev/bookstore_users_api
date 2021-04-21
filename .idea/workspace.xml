@@ -2,15 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="31536c51-566a-4571-8ffb-b9a64c3cb2fd" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/datasources/mysql/dbconfig/dbconfig.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/datasources/mysql/usersdb/users_db.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/config/config.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/dateutils/date_utils.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/user/users_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/user/users_controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/users/user.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/application.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/application.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasources/mysql/usersdb/users_db.go" beforeDir="false" afterPath="$PROJECT_DIR$/datasources/mysql/usersdb/users_db.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/domain/_" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/domain/users/user_dao.go" beforeDir="false" afterPath="$PROJECT_DIR$/domain/users/user_dao.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/domain/users/user_dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/domain/users/user_dto.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/users_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/users_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/_" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/dateutils/date_utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/dateutils/date_utils.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/errors/errors.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/errors/errors.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -69,6 +71,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>

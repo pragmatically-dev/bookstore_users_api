@@ -26,7 +26,10 @@ func CreateUser(user users.User) (*users.User, *errors.APIErrors) {
 	if errs := user.Validate(); errs != nil {
 		return nil, errs
 	}
-	user.Save()
+	saveErrs:=user.Save()
+	if saveErrs!=nil{
+		return nil,saveErrs
+	}
 
 	return &user, nil
 }

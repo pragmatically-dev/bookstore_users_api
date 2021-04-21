@@ -1,15 +1,16 @@
 package usersdb
 
 import (
-	"database/sql"
+	"log"
+
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"github.com/pragmatically-dev/bookstore_users_api/datasources/mysql/dbconfig"
 	"github.com/pragmatically-dev/bookstore_users_api/utils/config"
-	"log"
 )
 
-var(
-	Client *sql.DB
+var (
+	Client *sqlx.DB
 )
 
 func init() {
@@ -21,11 +22,11 @@ func init() {
 		Port:     config.DBPORT,
 	}
 	var err error
-	Client,err = sql.Open("mysql",dbc.GetConnectionURL())
-	if err !=nil{
+	Client, err = sqlx.Open("mysql", dbc.GetConnectionURL())
+	if err != nil {
 		panic(err)
 	}
-	if err= Client.Ping();err!=nil{
+	if err = Client.Ping(); err != nil {
 		panic(err)
 	}
 	log.Println("Database connected")

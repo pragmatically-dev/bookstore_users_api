@@ -8,11 +8,11 @@ import (
 
 //User the core of this micro-service
 type User struct {
-	ID        int64  `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	CreatedAt string `json:"created_at"`
+	ID        int64  `json:"user_id" db:"user_id" `
+	FirstName string `json:"first_name" db:"first_name" `
+	LastName  string `json:"last_name" db:"last_name" `
+	Email     string `json:"email" db:"email" `
+	CreatedAt string `json:"created_at" db:"created_at" `
 }
 
 func (user *User) CopyWith(data *User) {

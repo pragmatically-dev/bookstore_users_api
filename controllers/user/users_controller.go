@@ -12,19 +12,19 @@ import (
 
 func GetUser(ctx *gin.Context) {
 	var errs errors.APIErrors
-	raw,_ :=ctx.Params.Get("id")
-	UserID,err := strconv.ParseInt(raw,10,64)
-	if err != nil{
-		errs.AddError(errors.NewBadRequestError("Invalid ID","Could not parse ID"))
-		ctx.JSON(http.StatusBadRequest,errs)
+	raw, _ := ctx.Params.Get("id")
+	UserID, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil {
+		errs.AddError(errors.NewBadRequestError("Invalid ID", "Could not parse ID"))
+		ctx.JSON(http.StatusBadRequest, errs)
 		return
 	}
-	user,errsGetUser:=services.GetUser(UserID)
-	if errsGetUser != nil{
-		ctx.JSON(http.StatusNotFound,errsGetUser)
+	user, errsGetUser := services.GetUser(UserID)
+	if errsGetUser != nil {
+		ctx.JSON(http.StatusNotFound, errsGetUser)
 		return
 	}
-	ctx.JSON(http.StatusFound,&user)
+	ctx.JSON(http.StatusFound, &user)
 }
 
 //CreateUser controller for create an user
@@ -39,7 +39,7 @@ func CreateUser(ctx *gin.Context) {
 	res, createErr := services.CreateUser(user)
 	if createErr != nil {
 		errs.Errors = append(errs.Errors, createErr.Errors...)
-		ctx.JSON(http.StatusInternalServerError, errs)
+		ctx.JSON(errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code, errs)
 		return
 	}
 	ctx.JSON(http.StatusCreated, res)
