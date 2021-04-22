@@ -48,3 +48,31 @@ func CreateUser(ctx *gin.Context) {
 func SearchUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusNotImplemented, "not implemented")
 }
+
+func UpdateUser(ctx *gin.Context) {
+	var user users.User
+	var errs errors.APIErrors
+	raw, _ := ctx.Params.Get("id")
+	userID, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil {
+		errs.AddError(errors.NewBadRequestError("Invalid ID", "Could not parse ID"))
+		ctx.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	if err := ctx.BindJSON(&user); err != nil {
+		errs.AddError(errors.NewBadRequestError("Invalid JSON body", err.Error()))
+		ctx.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	user.ID = userID
+	isPartial := ctx.Request.Method == http.MethodPatch
+
+	res, updateErr := services.UpdateUser(isPartial, user)
+	if updateErr != nil {
+		errs.Errors = append(errs.Errors, updateErr.Errors...)
+		ctx.JSON(errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code, errs)
+		return
+	}
+	ctx.JSON(http.StatusOK, res)
+
+}

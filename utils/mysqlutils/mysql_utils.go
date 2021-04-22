@@ -1,6 +1,7 @@
 package mysqlutils
 
 import (
+	"log"
 	"strings"
 
 	"github.com/go-sql-driver/mysql"
@@ -28,16 +29,18 @@ func ParseError(err error) *errors.APIErrors {
 	sqlErr, ok := err.(*mysql.MySQLError)
 	if !ok {
 		if strings.Contains(err.Error(), ErrNoRows.Msg) {
-			globalErrors.AddError(errors.NewNotFoundError("Not Found", "No record matching given id"))
+			globalErrors.AddError(errors.NewNotFoundError("No record matching given id", "Not Found"))
 			return &globalErrors
 		}
-		globalErrors.AddError(errors.NewInternalServerError("Internal Server Error", "Error parsing database response"))
+		globalErrors.AddError(errors.NewInternalServerError("Error parsing database response", "Internal Server Error"))
 		return &globalErrors
 	}
+	log.Fatalln(err)
 	switch sqlErr.Number {
 	case uint16(ErrDuplicateEntry.Number):
-		globalErrors.AddError(errors.NewBadRequestError("Internal Server Error", "Invalid data"))
+		globalErrors.AddError(errors.NewBadRequestError("Invalid data", "Bad Request"))
+		return &globalErrors
 	}
-	globalErrors.AddError(errors.NewInternalServerError("Internal Server Error", "Error parsing database response"))
+	globalErrors.AddError(errors.NewInternalServerError("Error parsing database response", "Internal Server Error"))
 	return &globalErrors
 }
