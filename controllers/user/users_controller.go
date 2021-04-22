@@ -10,16 +10,21 @@ import (
 	"github.com/pragmatically-dev/bookstore_users_api/utils/errors"
 )
 
-func GetUser(ctx *gin.Context) {
+func getUserID(ctx *gin.Context) int64 {
 	var errs errors.APIErrors
 	raw, _ := ctx.Params.Get("id")
-	UserID, err := strconv.ParseInt(raw, 10, 64)
+	userID, err := strconv.ParseInt(raw, 10, 64)
 	if err != nil {
 		errs.AddError(errors.NewBadRequestError("Invalid ID", "Could not parse ID"))
 		ctx.JSON(http.StatusBadRequest, errs)
-		return
+		return 0
 	}
-	user, errsGetUser := services.GetUser(UserID)
+	return userID
+}
+
+func Get(ctx *gin.Context) {
+	userID := getUserID(ctx)
+	user, errsGetUser := services.GetUser(userID)
 	if errsGetUser != nil {
 		ctx.JSON(http.StatusNotFound, errsGetUser)
 		return
@@ -28,7 +33,7 @@ func GetUser(ctx *gin.Context) {
 }
 
 //CreateUser controller for create an user
-func CreateUser(ctx *gin.Context) {
+func Create(ctx *gin.Context) {
 	var user users.User
 	var errs errors.APIErrors
 	if err := ctx.BindJSON(&user); err != nil {
@@ -39,26 +44,22 @@ func CreateUser(ctx *gin.Context) {
 	res, createErr := services.CreateUser(user)
 	if createErr != nil {
 		errs.Errors = append(errs.Errors, createErr.Errors...)
-		ctx.JSON(errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code, errs)
+		//TODO: Transform this statement to a function. in order to respect DRY principle
+		lastErrorCode := errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code
+		ctx.JSON(lastErrorCode, errs)
 		return
 	}
 	ctx.JSON(http.StatusCreated, res)
 }
 
-func SearchUser(ctx *gin.Context) {
+func Search(ctx *gin.Context) {
 	ctx.JSON(http.StatusNotImplemented, "not implemented")
 }
 
-func UpdateUser(ctx *gin.Context) {
+func Update(ctx *gin.Context) {
 	var user users.User
 	var errs errors.APIErrors
-	raw, _ := ctx.Params.Get("id")
-	userID, err := strconv.ParseInt(raw, 10, 64)
-	if err != nil {
-		errs.AddError(errors.NewBadRequestError("Invalid ID", "Could not parse ID"))
-		ctx.JSON(http.StatusBadRequest, errs)
-		return
-	}
+	userID := getUserID(ctx)
 	if err := ctx.BindJSON(&user); err != nil {
 		errs.AddError(errors.NewBadRequestError("Invalid JSON body", err.Error()))
 		ctx.JSON(http.StatusBadRequest, errs)
@@ -70,9 +71,24 @@ func UpdateUser(ctx *gin.Context) {
 	res, updateErr := services.UpdateUser(isPartial, user)
 	if updateErr != nil {
 		errs.Errors = append(errs.Errors, updateErr.Errors...)
-		ctx.JSON(errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code, errs)
+		//TODO: Transform this statement to a function. in order to respect DRY principle
+		lastErrorCode := errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code
+		ctx.JSON(lastErrorCode, errs)
 		return
 	}
 	ctx.JSON(http.StatusOK, res)
 
+}
+
+func Delete(ctx *gin.Context) {
+	userID := getUserID(ctx)
+	errs := services.DeleteUser(userID)
+	if errs != nil {
+		//TODO: Transform this statement to a function. in order to respect DRY principle
+		lastErrorCode := errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code
+		ctx.JSON(lastErrorCode, errs)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, map[string]string{"Status": "Deleted"})
 }

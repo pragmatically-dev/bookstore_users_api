@@ -61,3 +61,15 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.APIErrors
 	}
 	return current, nil
 }
+
+func DeleteUser(userID int64) *errors.APIErrors {
+	user, err := GetUser(userID) //respecting SOLID
+	if err != nil {
+		return err
+	}
+	errs := user.Delete()
+	if errs != nil {
+		return errs
+	}
+	return nil
+}

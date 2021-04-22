@@ -22,7 +22,13 @@ var (
 		email,
 		created_at FROM users WHERE  user_id = ?;`
 
-	updateUserQuery = `UPDATE users SET first_name=?, last_name =?, email=? WHERE user_id=?`
+	updateUserQuery = `UPDATE users SET 
+			first_name=?, 
+			last_name =?, 
+			email=? 
+		WHERE user_id=?`
+
+	deleteUserQuery = ` DELETE FROM users_db.users WHERE user_id =?;`
 )
 
 //Get returns an user from dbs
@@ -73,6 +79,22 @@ func (user *User) Update() *errors.APIErrors {
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.ID)
+	if err != nil {
+		return mysqlutils.ParseError(err)
+	}
+	return nil
+}
+
+//Delete
+func (user *User) Delete() *errors.APIErrors {
+	var errs errors.APIErrors
+	stmt, err := usersdb.Client.Prepare(deleteUserQuery)
+	if err != nil {
+		errs.AddError(errors.NewInternalServerError(err.Error(), "Internal Server Error"))
+		return &errs
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(user.ID)
 	if err != nil {
 		return mysqlutils.ParseError(err)
 	}
