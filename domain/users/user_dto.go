@@ -13,6 +13,8 @@ type User struct {
 	LastName  string `json:"last_name" db:"last_name" `
 	Email     string `json:"email" db:"email" `
 	CreatedAt string `json:"created_at" db:"created_at" `
+	Status    string `json:"status" db:"status" `
+	Password  string `json:"-" db:"password" `
 }
 
 func (user *User) CopyWith(data *User) {
@@ -21,6 +23,8 @@ func (user *User) CopyWith(data *User) {
 	user.LastName = data.LastName
 	user.Email = data.Email
 	user.CreatedAt = data.CreatedAt
+	user.Status = data.Status
+	user.Password = data.Password
 }
 
 func (user *User) Validate() *errors.APIErrors {

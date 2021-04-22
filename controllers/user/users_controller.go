@@ -56,7 +56,15 @@ func Create(ctx *gin.Context) {
 }
 
 func Search(ctx *gin.Context) {
-	ctx.JSON(http.StatusNotImplemented, "not implemented")
+	var errs errors.APIErrors
+	status := ctx.Query("status")
+	users, err := services.FindByStatus(status)
+	if err != nil {
+		errs.Errors = append(errs.Errors, err.Errors...)
+		getLastErrorCode(ctx, &errs)
+		return
+	}
+	ctx.JSON(http.StatusFound, users)
 }
 
 func Update(ctx *gin.Context) {

@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+
 	"github.com/pragmatically-dev/bookstore_users_api/utils/config"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,7 @@ func StartApplication() {
 	router.Run()
 }
 
+//Middleware Json
 func Json() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")

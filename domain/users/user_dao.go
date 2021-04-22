@@ -1,6 +1,9 @@
 package users
 
 import (
+	"context"
+	"time"
+
 	"github.com/pragmatically-dev/bookstore_users_api/datasources/mysql/usersdb"
 	db "github.com/pragmatically-dev/bookstore_users_api/datasources/mysql/usersdb"
 	"github.com/pragmatically-dev/bookstore_users_api/utils/dateutils"
@@ -29,6 +32,14 @@ var (
 		WHERE user_id=?`
 
 	deleteUserQuery = ` DELETE FROM users_db.users WHERE user_id =?;`
+
+	findUserByStatus = `SELECT
+	user_id,
+	first_name,
+	last_name,
+	email,
+	status,
+	created_at FROM users WHERE  status = ?;`
 )
 
 //Get returns an user from dbs
@@ -49,11 +60,11 @@ func (user *User) Save() *errors.APIErrors {
 	var errs errors.APIErrors
 	user.CreatedAt = dateutils.GetNowString()
 	stmt, err := db.Client.Prepare(createUserQuery)
-	defer stmt.Close()
 	if err != nil {
 		errs.AddError(errors.NewInternalServerError(err.Error(), "Internal Server Error"))
 		return &errs
 	}
+	defer stmt.Close()
 	res, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.CreatedAt)
 	if saveErr != nil {
 		return mysqlutils.ParseError(saveErr)
@@ -99,4 +110,21 @@ func (user *User) Delete() *errors.APIErrors {
 		return mysqlutils.ParseError(err)
 	}
 	return nil
+}
+
+//findByStatus .
+func (user *User) FindByStatus(status string) ([]User, *errors.APIErrors) {
+	var users []User
+	var errs errors.APIErrors
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+	defer cancel()
+	err := db.Client.SelectContext(ctx, &users, findUserByStatus, status)
+	if err != nil {
+		return nil, mysqlutils.ParseError(err)
+	}
+	if len(users) <= 0 {
+		errs.AddError(errors.NewNotFoundError("Not Found", "No users matching status"))
+		return nil, &errs
+	}
+	return users, nil
 }
