@@ -21,6 +21,11 @@ func getUserID(ctx *gin.Context) int64 {
 	}
 	return userID
 }
+func getLastErrorCode(ctx *gin.Context, errs *errors.APIErrors) {
+	lastIndex := len(errs.Errors) - 1
+	lastErrorCode := errs.Errors[lastIndex].(*errors.UserError).Code
+	ctx.JSON(lastErrorCode, errs)
+}
 
 func Get(ctx *gin.Context) {
 	userID := getUserID(ctx)
@@ -44,9 +49,7 @@ func Create(ctx *gin.Context) {
 	res, createErr := services.CreateUser(user)
 	if createErr != nil {
 		errs.Errors = append(errs.Errors, createErr.Errors...)
-		//TODO: Transform this statement to a function. in order to respect DRY principle
-		lastErrorCode := errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code
-		ctx.JSON(lastErrorCode, errs)
+		getLastErrorCode(ctx, &errs)
 		return
 	}
 	ctx.JSON(http.StatusCreated, res)
@@ -66,14 +69,12 @@ func Update(ctx *gin.Context) {
 		return
 	}
 	user.ID = userID
+	//isPartial check the  http method of the request
 	isPartial := ctx.Request.Method == http.MethodPatch
-
 	res, updateErr := services.UpdateUser(isPartial, user)
 	if updateErr != nil {
 		errs.Errors = append(errs.Errors, updateErr.Errors...)
-		//TODO: Transform this statement to a function. in order to respect DRY principle
-		lastErrorCode := errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code
-		ctx.JSON(lastErrorCode, errs)
+		getLastErrorCode(ctx, &errs)
 		return
 	}
 	ctx.JSON(http.StatusOK, res)
@@ -84,11 +85,8 @@ func Delete(ctx *gin.Context) {
 	userID := getUserID(ctx)
 	errs := services.DeleteUser(userID)
 	if errs != nil {
-		//TODO: Transform this statement to a function. in order to respect DRY principle
-		lastErrorCode := errs.Errors[len(errs.Errors)-1].(*errors.UserError).Code
-		ctx.JSON(lastErrorCode, errs)
+		getLastErrorCode(ctx, errs)
 		return
 	}
-
 	ctx.JSON(http.StatusOK, map[string]string{"Status": "Deleted"})
 }
