@@ -79,7 +79,7 @@ func DeleteUser(userID int64) *errors.APIErrors {
 	return nil
 }
 
-func FindByStatus(status string) ([]users.User, *errors.APIErrors) {
+func FindByStatus(status string) (users.Users, *errors.APIErrors) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
 

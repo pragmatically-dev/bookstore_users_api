@@ -10,23 +10,6 @@ import (
 	"github.com/pragmatically-dev/bookstore_users_api/utils/errors"
 )
 
-func getUserID(ctx *gin.Context) int64 {
-	var errs errors.APIErrors
-	raw, _ := ctx.Params.Get("id")
-	userID, err := strconv.ParseInt(raw, 10, 64)
-	if err != nil {
-		errs.AddError(errors.NewBadRequestError("Invalid ID", "Could not parse ID"))
-		ctx.JSON(http.StatusBadRequest, errs)
-		return 0
-	}
-	return userID
-}
-func getLastErrorCode(ctx *gin.Context, errs *errors.APIErrors) {
-	lastIndex := len(errs.Errors) - 1
-	lastErrorCode := errs.Errors[lastIndex].(*errors.UserError).Code
-	ctx.JSON(lastErrorCode, errs)
-}
-
 func Get(ctx *gin.Context) {
 	userID := getUserID(ctx)
 	user, errsGetUser := services.GetUser(userID)
@@ -34,7 +17,7 @@ func Get(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, errsGetUser)
 		return
 	}
-	ctx.JSON(http.StatusFound, &user)
+	sendValidResponse(ctx, user)
 }
 
 //CreateUser controller for create an user
@@ -49,10 +32,10 @@ func Create(ctx *gin.Context) {
 	res, createErr := services.CreateUser(user)
 	if createErr != nil {
 		errs.Errors = append(errs.Errors, createErr.Errors...)
-		getLastErrorCode(ctx, &errs)
+		sendWithLastErrorCode(ctx, &errs)
 		return
 	}
-	ctx.JSON(http.StatusCreated, res)
+	sendValidResponse(ctx, res)
 }
 
 func Search(ctx *gin.Context) {
@@ -61,10 +44,11 @@ func Search(ctx *gin.Context) {
 	users, err := services.FindByStatus(status)
 	if err != nil {
 		errs.Errors = append(errs.Errors, err.Errors...)
-		getLastErrorCode(ctx, &errs)
+		sendWithLastErrorCode(ctx, &errs)
 		return
 	}
-	ctx.JSON(http.StatusFound, users)
+	isPublic := ctx.GetHeader("X-Public") == "true"
+	ctx.JSON(http.StatusFound, users.Marshall(isPublic))
 }
 
 func Update(ctx *gin.Context) {
@@ -82,19 +66,41 @@ func Update(ctx *gin.Context) {
 	res, updateErr := services.UpdateUser(isPartial, user)
 	if updateErr != nil {
 		errs.Errors = append(errs.Errors, updateErr.Errors...)
-		getLastErrorCode(ctx, &errs)
+		sendWithLastErrorCode(ctx, &errs)
 		return
 	}
-	ctx.JSON(http.StatusOK, res)
-
+	sendValidResponse(ctx, res)
 }
 
 func Delete(ctx *gin.Context) {
 	userID := getUserID(ctx)
 	errs := services.DeleteUser(userID)
 	if errs != nil {
-		getLastErrorCode(ctx, errs)
+		sendWithLastErrorCode(ctx, errs)
 		return
 	}
 	ctx.JSON(http.StatusOK, map[string]string{"Status": "Deleted"})
+}
+
+//----------------------utils for the controllers-------------------------
+func getUserID(ctx *gin.Context) int64 {
+	var errs errors.APIErrors
+	raw, _ := ctx.Params.Get("id")
+	userID, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil {
+		errs.AddError(errors.NewBadRequestError("Invalid ID", "Could not parse ID"))
+		ctx.JSON(http.StatusBadRequest, errs)
+		return 0
+	}
+	return userID
+}
+func sendWithLastErrorCode(ctx *gin.Context, errs *errors.APIErrors) {
+	lastIndex := len(errs.Errors) - 1
+	lastErrorCode := errs.Errors[lastIndex].(*errors.UserError).Code
+	ctx.JSON(lastErrorCode, errs)
+}
+
+func sendValidResponse(ctx *gin.Context, user *users.User) {
+	isPublic := ctx.GetHeader("X-Public") == "true"
+	ctx.JSON(http.StatusFound, user.Marshall(isPublic))
 }

@@ -21,6 +21,8 @@ type User struct {
 	Password  string `json:"password" db:"password" `
 }
 
+type Users []User
+
 func (user *User) CopyWith(data *User) {
 	user.ID = data.ID
 	user.FirstName = data.FirstName
