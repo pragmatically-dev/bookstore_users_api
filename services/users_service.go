@@ -2,6 +2,8 @@ package services
 
 import (
 	"github.com/pragmatically-dev/bookstore_users_api/domain/users"
+	"github.com/pragmatically-dev/bookstore_users_api/utils/cryptoutils"
+	"github.com/pragmatically-dev/bookstore_users_api/utils/dateutils"
 	"github.com/pragmatically-dev/bookstore_users_api/utils/errors"
 )
 
@@ -26,6 +28,9 @@ func CreateUser(user users.User) (*users.User, *errors.APIErrors) {
 	if errs := user.Validate(); errs != nil {
 		return nil, errs
 	}
+	user.Status = users.StatusActive
+	user.CreatedAt = dateutils.GetNowString()
+	user.Password, _ = cryptoutils.HashPassword(user.Password)
 	saveErrs := user.Save()
 	if saveErrs != nil {
 		return nil, saveErrs

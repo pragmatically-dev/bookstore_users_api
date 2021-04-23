@@ -6,6 +6,10 @@ import (
 	"github.com/pragmatically-dev/bookstore_users_api/utils/errors"
 )
 
+const (
+	StatusActive = "active"
+)
+
 //User the core of this micro-service
 type User struct {
 	ID        int64  `json:"user_id" db:"user_id" `
@@ -14,7 +18,7 @@ type User struct {
 	Email     string `json:"email" db:"email" `
 	CreatedAt string `json:"created_at" db:"created_at" `
 	Status    string `json:"status" db:"status" `
-	Password  string `json:"-" db:"password" `
+	Password  string `json:"password" db:"password" `
 }
 
 func (user *User) CopyWith(data *User) {
@@ -33,6 +37,11 @@ func (user *User) Validate() *errors.APIErrors {
 	//TODO: IMPROVE EMAIL VALIDATION
 	if user.Email == "" {
 		errs.AddError(errors.NewBadRequestError("Invalid email", "The Email must be completed"))
+	}
+
+	user.Password = strings.TrimSpace(user.Password)
+	if user.Password == "" {
+		errs.AddError(errors.NewBadRequestError("Invalid Password", "The password cannot be empty"))
 	}
 
 	if len(errs.Errors) > 0 {

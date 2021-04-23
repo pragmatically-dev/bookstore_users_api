@@ -6,7 +6,6 @@ import (
 
 	"github.com/pragmatically-dev/bookstore_users_api/datasources/mysql/usersdb"
 	db "github.com/pragmatically-dev/bookstore_users_api/datasources/mysql/usersdb"
-	"github.com/pragmatically-dev/bookstore_users_api/utils/dateutils"
 	"github.com/pragmatically-dev/bookstore_users_api/utils/errors"
 	"github.com/pragmatically-dev/bookstore_users_api/utils/mysqlutils"
 )
@@ -16,14 +15,19 @@ var (
 	first_name,
 	last_name,
 	email,
-	created_at) VALUES(?,?,?,?)`
+	created_at,
+	password,
+	status
+	) VALUES(?,?,?,?,?,?)`
 
 	getUserQuery = `SELECT
 		user_id,
 		first_name,
 		last_name,
 		email,
-		created_at FROM users WHERE  user_id = ?;`
+		created_at,
+		status
+		FROM users WHERE  user_id = ?;`
 
 	updateUserQuery = `UPDATE users SET 
 			first_name=?, 
@@ -58,14 +62,13 @@ func (user *User) Get() *errors.APIErrors {
 //Save insert an user in the db
 func (user *User) Save() *errors.APIErrors {
 	var errs errors.APIErrors
-	user.CreatedAt = dateutils.GetNowString()
 	stmt, err := db.Client.Prepare(createUserQuery)
 	if err != nil {
 		errs.AddError(errors.NewInternalServerError(err.Error(), "Internal Server Error"))
 		return &errs
 	}
 	defer stmt.Close()
-	res, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.CreatedAt)
+	res, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.CreatedAt, user.Password, user.Status)
 	if saveErr != nil {
 		return mysqlutils.ParseError(saveErr)
 	}
