@@ -1,4 +1,4 @@
-package services
+package userservice
 
 import (
 	"github.com/pragmatically-dev/bookstore_users_api/domain/users"
@@ -7,7 +7,10 @@ import (
 	"github.com/pragmatically-dev/bookstore_users_api/utils/errors"
 )
 
-func GetUser(userID int64) (*users.User, *errors.APIErrors) {
+type UserService struct {
+}
+
+func (service *UserService) GetUser(userID int64) (*users.User, *errors.APIErrors) {
 	var errs errors.APIErrors
 	if userID <= 0 {
 		errs.AddError(errors.NewBadRequestError("Invalid user ID", "Could not parse ID"))
@@ -24,7 +27,8 @@ func GetUser(userID int64) (*users.User, *errors.APIErrors) {
 
 }
 
-func CreateUser(user users.User) (*users.User, *errors.APIErrors) {
+func (service *UserService) CreateUser(user users.User) (*users.User, *errors.APIErrors) {
+
 	if errs := user.Validate(); errs != nil {
 		return nil, errs
 	}
@@ -39,8 +43,8 @@ func CreateUser(user users.User) (*users.User, *errors.APIErrors) {
 	return &user, nil
 }
 
-func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.APIErrors) {
-	current, err := GetUser(user.ID) //respecting SOLID
+func (service *UserService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.APIErrors) {
+	current, err := service.GetUser(user.ID) //respecting SOLID
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +71,8 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.APIErrors
 	return current, nil
 }
 
-func DeleteUser(userID int64) *errors.APIErrors {
-	user, err := GetUser(userID) //respecting SOLID
+func (service *UserService) DeleteUser(userID int64) *errors.APIErrors {
+	user, err := service.GetUser(userID) //respecting SOLID
 	if err != nil {
 		return err
 	}
@@ -79,7 +83,7 @@ func DeleteUser(userID int64) *errors.APIErrors {
 	return nil
 }
 
-func FindByStatus(status string) (users.Users, *errors.APIErrors) {
+func (service *UserService) FindByStatus(status string) (users.Users, *errors.APIErrors) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
 

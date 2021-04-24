@@ -1,7 +1,6 @@
 package mysqlutils
 
 import (
-	"log"
 	"strings"
 
 	"github.com/go-sql-driver/mysql"
@@ -35,10 +34,9 @@ func ParseError(err error) *errors.APIErrors {
 		globalErrors.AddError(errors.NewInternalServerError("Error parsing database response", "Internal Server Error"))
 		return &globalErrors
 	}
-	log.Fatalln(err)
 	switch sqlErr.Number {
 	case uint16(ErrDuplicateEntry.Number):
-		globalErrors.AddError(errors.NewBadRequestError("Invalid data", "Bad Request"))
+		globalErrors.AddError(errors.NewBadRequestError("Invalid data,there is a duplicate entry", "Bad Request"))
 		return &globalErrors
 	}
 	globalErrors.AddError(errors.NewInternalServerError("Error parsing database response", "Internal Server Error"))

@@ -80,6 +80,7 @@ func (user *User) Save() *errors.APIErrors {
 	}
 
 	user.ID = userID
+
 	return nil
 }
 

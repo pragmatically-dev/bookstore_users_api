@@ -6,13 +6,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pragmatically-dev/bookstore_users_api/domain/users"
-	"github.com/pragmatically-dev/bookstore_users_api/services"
+	"github.com/pragmatically-dev/bookstore_users_api/services/userservice"
+
 	"github.com/pragmatically-dev/bookstore_users_api/utils/errors"
+)
+
+var (
+	_IUserService = &userservice.UserService{}
 )
 
 func Get(ctx *gin.Context) {
 	userID := getUserID(ctx)
-	user, errsGetUser := services.GetUser(userID)
+
+	user, errsGetUser := _IUserService.GetUser(userID)
 	if errsGetUser != nil {
 		ctx.JSON(http.StatusNotFound, errsGetUser)
 		return
@@ -29,7 +35,8 @@ func Create(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errs)
 		return
 	}
-	res, createErr := services.CreateUser(user)
+	res, createErr := _IUserService.CreateUser(user)
+
 	if createErr != nil {
 		errs.Errors = append(errs.Errors, createErr.Errors...)
 		sendWithLastErrorCode(ctx, &errs)
@@ -41,7 +48,7 @@ func Create(ctx *gin.Context) {
 func Search(ctx *gin.Context) {
 	var errs errors.APIErrors
 	status := ctx.Query("status")
-	users, err := services.FindByStatus(status)
+	users, err := _IUserService.FindByStatus(status)
 	if err != nil {
 		errs.Errors = append(errs.Errors, err.Errors...)
 		sendWithLastErrorCode(ctx, &errs)
@@ -63,7 +70,7 @@ func Update(ctx *gin.Context) {
 	user.ID = userID
 	//isPartial check the  http method of the request
 	isPartial := ctx.Request.Method == http.MethodPatch
-	res, updateErr := services.UpdateUser(isPartial, user)
+	res, updateErr := _IUserService.UpdateUser(isPartial, user)
 	if updateErr != nil {
 		errs.Errors = append(errs.Errors, updateErr.Errors...)
 		sendWithLastErrorCode(ctx, &errs)
@@ -74,7 +81,7 @@ func Update(ctx *gin.Context) {
 
 func Delete(ctx *gin.Context) {
 	userID := getUserID(ctx)
-	errs := services.DeleteUser(userID)
+	errs := _IUserService.DeleteUser(userID)
 	if errs != nil {
 		sendWithLastErrorCode(ctx, errs)
 		return
