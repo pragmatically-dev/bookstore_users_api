@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/pragmatically-dev/bookstore_users_api/logger"
 	"github.com/pragmatically-dev/bookstore_users_api/utils/config"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,8 @@ func StartApplication() {
 	config.Load()
 	fmt.Println("app running")
 	router.Use(Json())
-	mapUrls() //initialize the routes
+	initializeRoutes() //initialize the routes
+	logger.Info("About to start the application")
 	router.Run()
 }
 

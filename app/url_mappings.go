@@ -5,7 +5,7 @@ import (
 	"github.com/pragmatically-dev/bookstore_users_api/controllers/user"
 )
 
-func mapUrls() {
+func initializeRoutes() {
 	router.GET("/ping", ping.Ping)
 
 	//users routes
