@@ -11,4 +11,5 @@ type IUserService interface {
 	UpdateUser(isPartial bool, user users.User) (*users.User, *errors.APIErrors)
 	DeleteUser(userID int64) *errors.APIErrors
 	FindByStatus(status string) (users.Users, *errors.APIErrors)
+	LoginUser(users.LoginRequest) (*users.User, *errors.APIErrors)
 }

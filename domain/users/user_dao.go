@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	db "github.com/pragmatically-dev/bookstore_users_api/datasources/mysql/usersdb"
@@ -44,12 +45,39 @@ var (
 	email,
 	status,
 	created_at FROM users WHERE  status = ?;`
+
+	queryUserByEmailAndPassword = `SELECT
+	user_id,
+	first_name,
+	last_name,
+	email,
+	status,
+	created_at FROM users WHERE  email = ? AND password =?;`
+
+	getUserQueryByEmail = `SELECT
+		user_id,
+		first_name,
+		last_name,
+		email,
+		password,
+		created_at,
+		status
+		FROM users WHERE  email = ?;`
 )
 
 //Get returns an user from dbs
-func (user *User) Get() *errors.APIErrors {
+func (user *User) Get(byId bool) *errors.APIErrors {
 	var userFound User
-	getErr := db.Client.Get(&userFound, getUserQuery, user.ID)
+	var param []interface{}
+	var query string
+	if byId {
+		param = append(param, user.ID)
+		query = getUserQuery
+	} else {
+		param = append(param, user.Email)
+		query = getUserQueryByEmail
+	}
+	getErr := db.Client.Get(&userFound, query, param...)
 	if getErr != nil {
 		logger.Error("Error when trying to get an user from db", getErr)
 		return mysqlutils.ParseError(getErr)
@@ -143,4 +171,21 @@ func (user *User) FindByStatus(status string) ([]User, *errors.APIErrors) {
 		return nil, &errs
 	}
 	return users, nil
+}
+
+func (user *User) FindByEmailAndPassword() *errors.APIErrors {
+	var errs errors.APIErrors
+	var userFound User
+	getErr := db.Client.Get(&userFound, queryUserByEmailAndPassword, user.Email, user.Password)
+	if getErr != nil {
+		if strings.Contains(getErr.Error(), mysqlutils.ErrNoRows.Msg) {
+			errs.AddError(errors.NewNotFoundError("Invalid Credentials", "Not Found"))
+			return &errs
+		}
+		logger.Error("Error when trying to login an user", getErr)
+
+	}
+	user.CopyWith(&userFound)
+
+	return nil
 }

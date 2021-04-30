@@ -18,11 +18,10 @@ func (service *UserService) GetUser(userID int64) (*users.User, *errors.APIError
 	user := users.User{
 		ID: userID,
 	}
-	getErrs := user.Get()
+	getErrs := user.Get(true)
 	if getErrs != nil {
 		return nil, getErrs
 	}
-
 	return &user, nil
 
 }
@@ -87,4 +86,23 @@ func (service *UserService) FindByStatus(status string) (users.Users, *errors.AP
 	dao := &users.User{}
 	return dao.FindByStatus(status)
 
+}
+
+func (service *UserService) LoginUser(req users.LoginRequest) (*users.User, *errors.APIErrors) {
+	var errs errors.APIErrors
+	dao := &users.User{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	err := dao.Get(false)
+	if err != nil {
+		return nil, err
+	}
+
+	match := cryptoutils.CheckPasswordHash(req.Password, dao.Password)
+	if match {
+		return dao, nil
+	}
+	errs.AddError(errors.NewBadRequestError("Bad Request", "Invalid credentials"))
+	return nil, &errs
 }

@@ -16,4 +16,5 @@ func initializeRoutes() {
 	router.DELETE("/users/:id", user.Delete)
 
 	router.GET("/internal/users/search", user.Search)
+	router.POST("/users/login", user.Login)
 }

@@ -1,2 +1,9 @@
 
-GET http://localhost:8080/users/1
+# GET http://localhost:8080/users/1;
+
+POST http://localhost:8080/users/login HTTP/1.1
+
+{
+    "email":"totonieva1@gmail.com",
+    "password":"JDJhJDE1JHZUNEZnNU1Kb3FRTmNlOXpkczFPU2U0L1pVRldLVGZSbEE3UUtSd2JuZEVMWlRxRTBaenV5"
+}

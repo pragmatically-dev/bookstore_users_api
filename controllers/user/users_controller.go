@@ -89,6 +89,23 @@ func Delete(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, map[string]string{"Status": "Deleted"})
 }
 
+func Login(ctx *gin.Context) {
+	var req users.LoginRequest
+	err := ctx.BindJSON(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("Invalid json body", err.Error()))
+		return
+	}
+	usr, errs := _IUserService.LoginUser(req)
+	if errs != nil {
+		sendWithLastErrorCode(ctx, errs)
+		return
+	}
+
+	sendValidResponse(ctx, usr)
+
+}
+
 //----------------------utils for the controllers-------------------------
 func getUserID(ctx *gin.Context) int64 {
 	var errs errors.APIErrors
